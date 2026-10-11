@@ -19,6 +19,14 @@ The current version uses DENUE (INEGI) as its main data source, enriches records
 
 The application does not send email or WhatsApp messages. Final review and outreach remain manual.
 
+## Interface
+
+Main screen in light and dark mode. Screenshots use fictitious data.
+
+![Dashboard in light mode](assets/panel-claro.png)
+
+![Dashboard in dark mode](assets/panel-oscuro.png)
+
 ## Architecture
 
 ```text
