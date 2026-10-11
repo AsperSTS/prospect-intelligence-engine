@@ -1,0 +1,21 @@
+# Secretos: nunca se suben
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Datos locales y generados
+*.db
+*.sqlite
+data/
+exports/
+graphify-out/cache/
+
+# Entornos y caches de Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Sistema
+.DS_Store
