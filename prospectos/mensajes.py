@@ -1,4 +1,4 @@
-"""Renderizado y validación de mensajes. Determinista, sin LLM. Los textos viven en config/templates.toml.
+"""Renderizado y validación de mensajes. Determinista: las plantillas se rellenan con reglas fijas. Los textos viven en config/templates.toml.
 
 Receta RAPID: un Reconocimiento real, Autoridad mínima, una Pregunta, Intervención pequeña, Descompresión.
 El primer mensaje busca información, no cerrar una venta. Solo se afirma lo verificable: {obs} exige evidencia pública con URL.
@@ -58,7 +58,6 @@ def plantillas() -> dict:
     return _cache["datos"]
 
 
-# ----------------------------------------------------------------------------- nombres
 _MINUSCULAS = {"de", "del", "la", "las", "los", "el", "y", "e", "en", "para", "por", "con", "al"}
 _CORTAS_NORMALES = {"san", "sur", "luz", "oro", "rio", "gas", "sol", "mar", "pan", "uno", "dos", "sin", "mas", "una", "ver", "mex", "don", "doña"}
 _ONSETS = {"pl", "pr", "bl", "br", "cl", "cr", "dr", "fl", "fr", "gl", "gr", "tr", "ch", "ll", "rr"}
@@ -100,7 +99,6 @@ def palabras(texto: str) -> int:
     return len(re.findall(r"\S+", texto))
 
 
-# ----------------------------------------------------------------------------- variantes
 def _h(pid: str) -> int:
     return int(hashlib.sha1(pid.encode()).hexdigest(), 16)
 
@@ -114,7 +112,6 @@ def elegir_variantes(pid: str, hay_obs: bool) -> dict:
             "email_asunto": "A" if (h // 13) % 2 == 0 else "B"}
 
 
-# ----------------------------------------------------------------------------- render
 @dataclass
 class Mensaje:
     canal: str                 # whatsapp | email | seguimiento
@@ -183,7 +180,6 @@ def seguimiento(r: dict, paso: int) -> Mensaje:
     return m
 
 
-# ----------------------------------------------------------------------------- validación
 def validate_message(texto: str, canal: str, asunto: str = "", evidencia: bool = False) -> list[str]:
     """Devuelve la lista de problemas (vacía = válido). Se ejecuta antes de mostrar cualquier mensaje."""
     problemas = []

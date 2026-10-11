@@ -33,7 +33,6 @@ def test_plantillas_cargan_y_se_validan(tmp_path, monkeypatch):
         m.plantillas()
 
 
-# ---------------------------------------------------------------- WhatsApp
 @pytest.mark.parametrize("giro", GIROS)
 @pytest.mark.parametrize("nombre", NOMBRES)
 @pytest.mark.parametrize("pid", [str(i) for i in range(12)])
@@ -74,7 +73,6 @@ def test_whatsapp_no_incluye_numero_de_yael_en_enlaces():
     assert config.OWNER_WHATSAPP not in contacto.whatsapp_url("2221234567", msg.cuerpo)
 
 
-# ---------------------------------------------------------------- correo
 @pytest.mark.parametrize("giro", GIROS)
 @pytest.mark.parametrize("nombre", NOMBRES)
 @pytest.mark.parametrize("pid", [str(i) for i in range(10)])
@@ -93,7 +91,6 @@ def test_correo_reparte_credencial_y_asunto():
     assert len(largo.asunto) <= 60 and largo.valido and largo.variante.endswith("-S")
 
 
-# ---------------------------------------------------------------- seguimientos
 @pytest.mark.parametrize("giro", GIROS)
 def test_seguimientos_distintos_y_validos(giro):
     msgs = [m.seguimiento(r(giro), n) for n in (1, 2, 3)]
@@ -102,7 +99,6 @@ def test_seguimientos_distintos_y_validos(giro):
     assert "Cierro el tema" in msgs[2].cuerpo and "insistente" not in " ".join(x.cuerpo for x in msgs)
 
 
-# ---------------------------------------------------------------- validador
 @pytest.mark.parametrize("texto,fragmento", [
     ("Hola {nombre}, ¿cómo están?", "variables sin renderizar"),
     ("Hola. Somos una empresa líder en soluciones. ¿Les interesa?", "prohibida"),

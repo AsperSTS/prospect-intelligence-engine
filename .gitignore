@@ -1,21 +1,45 @@
-# Secretos: nunca se suben
+# Secretos
 .env
 .env.*
 !.env.example
 .streamlit/secrets.toml
 
-# Datos locales y generados
-*.db
-*.sqlite
+# Datos locales, bases y exportaciones (no versionar datos reales de prospectos)
 data/
 exports/
-graphify-out/cache/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.xlsx
+*.csv
+*.log
+logs/
 
-# Entornos y caches de Python
-.venv/
+# Artefactos generados
+graphify-out/
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
 .pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
 
-# Sistema
+# Editores, sistema y configuración local del asistente
 .DS_Store
+.idea/
+.vscode/
+.claude/
+
+
+# Documentación interna del proyecto (no publicar)
+BRIEF_CLAUDE_CODE_PROSPECCION_DENUE.md
+docs/

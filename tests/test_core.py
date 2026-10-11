@@ -32,7 +32,6 @@ def _fila_db(i="1", **kw):
 _fila = _fila_db  # compat con otros tests
 
 
-# ---------------------------------------------------------------- DENUE
 def test_esquema_denue_tolera_campos_extra_y_exige_id():
     e = Establecimiento.model_validate({"Id": "1", "Nombre": "X", "Extra": "y", "Tipo": "Fijo", "nom_corredor_industrial": "FINSA"})
     assert (e.id, e.tipo_establecimiento, e.corredor_nombre) == ("1", "Fijo", "FINSA")
@@ -62,7 +61,6 @@ def test_fecha_alta_se_guarda_tal_cual_sin_convertir_a_edad():
     assert f["fecha_alta"] == "2018-03" and "antig" not in " ".join(f)
 
 
-# ---------------------------------------------------------------- giros / contacto
 def test_clasificar_giros_y_display():
     assert giros.clasificar("336360", "x").giro == "Autopartes"
     assert giros.clasificar("332710", "x").giro == "Metalmecánica"
@@ -96,7 +94,6 @@ def test_dominio_ignora_genericos():
     assert contacto.dominio("192.168.0.1") is None
 
 
-# ---------------------------------------------------------------- migración / CRM
 def test_migracion_respalda_y_conserva(tmpdb):
     con = sqlite3.connect(config.DB_PATH)
     con.execute("CREATE TABLE prospectos (id TEXT PRIMARY KEY, nombre TEXT NOT NULL, estado TEXT DEFAULT 'nuevo', toques INTEGER DEFAULT 0)")

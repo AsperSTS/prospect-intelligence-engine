@@ -41,7 +41,6 @@ def _md(html: str) -> None:
     st.html(html)
 
 
-# ------------------------------------------------------------------ columna 1: cola (selector)
 def _contactos_cola(r) -> str:
     c = []
     if contacto.email_valido(v(r["correo_web"])) or contacto.email_valido(v(r["correo"])):
@@ -63,7 +62,6 @@ def _item_cola(r, seleccionado: bool, prefijo: str) -> bool:
     return st.button(etiqueta, key=f"{prefijo}_sel_{r['id']}", type="primary" if seleccionado else "secondary", width="stretch")
 
 
-# ------------------------------------------------------------------ columna 2: contexto (decisión)
 def _porque_si(fit_items: list[dict]) -> str:
     textos = {"giro": "Giro", "estrato": "Tamaño", "tipo": "Fijo", "corredor": "Corredor", "complejidad": "Complejidad", "senales": "Señales web"}
     filas = [f'<div><span class="ok">✓</span> {escape(textos.get(i["clave"], i["etiqueta"]))}</div>' for i in fit_items if i["max"] and i["pts"] >= 0.6 * i["max"]]
@@ -191,7 +189,6 @@ def _contexto(r, sen: list[dict], hist: list[dict], df: pd.DataFrame, modo: str)
                 _md(theme.titulo_isla("Historial de interacciones", "manual") + _historial_html(hist))
 
 
-# ------------------------------------------------------------------ columna 3: acción
 def _canales_disponibles(r) -> dict[str, str]:
     c = {}
     correo = v(r["correo_web"]) if contacto.email_valido(v(r["correo_web"])) else v(r["correo"])
@@ -303,7 +300,6 @@ def _accion(r, sen: list[dict], hist: list[dict], modo: str, tema: str) -> None:
                         _mutar(db.cambiar_estado, pid, est, notas or None)
 
 
-# ------------------------------------------------------------------ vista
 def vista(df: pd.DataFrame, inter: pd.DataFrame, sen: pd.DataFrame, modo: str, vacio: str, df_todo: pd.DataFrame, tema: str = "auto",
           filtros: Callable[[pd.DataFrame], pd.DataFrame] | None = None) -> None:
     """`filtros` (opcional) dibuja los controles de filtro dentro de la isla de la cola y devuelve el DataFrame filtrado."""

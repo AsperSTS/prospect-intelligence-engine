@@ -1,6 +1,6 @@
 """Fit Score y Priority Score, ambos explicables (cada punto tiene motivo).
 
-FIT        ¿Qué tan compatible es el establecimiento con lo que Yael puede vender?  (0-100, cambia poco)
+FIT        ¿Qué tan compatible es el establecimiento con lo que se ofrece?  (0-100, cambia poco)
 PRIORIDAD  ¿Qué tan conveniente es revisarlo/contactarlo HOY?                        (0-100, cambia con el estado)
 
 Son reglas internas de priorización, NO probabilidades de compra. Hasta tener contactos reales no hay calibración.

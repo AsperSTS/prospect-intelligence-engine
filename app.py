@@ -1,4 +1,4 @@
-"""Panel Streamlit: streamlit run app.py  (entorno conda python314_Demos). Herramienta local y privada de una sola persona."""
+"""Panel Streamlit local: streamlit run app.py. Pensado para un solo usuario."""
 from datetime import date
 
 import pandas as pd
@@ -9,7 +9,6 @@ from ui import base, datos, debug, metricas, theme, trabajo
 
 st.set_page_config(page_title="Prospectos", layout="wide", initial_sidebar_state="collapsed")
 
-# tema: el valor del selector (si ya cambió en esta ejecución) o la preferencia guardada
 tema_ui = st.session_state.get("tema", theme.tema_guardado())
 modo_iframe = theme.aplicar(tema_ui)
 
@@ -21,7 +20,6 @@ hoy = date.today().isoformat()
 abiertos = df["estado"].isin(["nuevo", "revisado"]) & (df["priority_score"] > 0) & (df["snooze_until"].fillna("") <= hoy)
 seg_due = df["estado"].eq("contactado") & (df["proximo_seguimiento"].fillna("9999") <= hoy)
 
-# ---------- isla superior: marca · metas · tema · publicación (explícito) · bordes de diseño ----------
 with st.container(key="isla_barra"):
     fila_sup = st.columns([8, 2.5, 1.8, 0.8], vertical_alignment="center", gap="small")
     with db.conectar() as con:

@@ -4,7 +4,6 @@ from datetime import date
 from . import contacto
 from .db import CERRADOS
 
-ACCIONES = ("email", "telefono", "whatsapp_or_copy", "manual_review", "follow_up", "skip", "discard")
 ROTULOS = {"email": "Enviar correo", "telefono": "Llamar", "whatsapp_or_copy": "WhatsApp o copiar mensaje", "manual_review": "Revisar a mano",
            "follow_up": "Dar seguimiento", "skip": "Saltar", "discard": "Descartar"}
 FIT_MIN_ACCION = 50
@@ -36,7 +35,6 @@ def recommend_next_action(r: dict, fit_score: int, tiene_senal_web: bool, hoy: d
     if estado in ("respondio", "respuesta_positiva", "reunion", "propuesta"):
         return res("manual_review", "Hay conversación abierta: contesta manualmente, sin mensajes automáticos.", "alta", [])
 
-    # --- nuevo / revisado ---
     if r.get("possible_chain"):
         return res("manual_review", f"Posible grupo/cadena ({r.get('group_reason') or 'sin motivo'}): valida si decide localmente.", "media")
     if r.get("giro") == "Otro":

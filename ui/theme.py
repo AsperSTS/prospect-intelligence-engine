@@ -1,6 +1,6 @@
-"""Sistema visual de islas (estilo Apple): tokens, tipografía única, estados de interacción unificados y helpers de HTML.
+"""Sistema visual de islas: tokens, tipografía única, estados de interacción y helpers de HTML.
 
-Reglas (guía ui-ux-pro-max + brief):
+Reglas de diseño:
 - UNA familia tipográfica (la del sistema; SF Pro en Mac) y SOLO cuatro tamaños: 12 (etiquetas/auxiliar) · 14 (cuerpo y controles) ·
   16 (énfasis) · 20 (nombre y cifras). Solo dos pesos: 400 y 600. Interlineado 1.5.
 - Espaciado en múltiplos de 4 px. Radios: 8 px controles, 14 px islas, 99 px pastillas.
@@ -42,7 +42,6 @@ def aplicar(tema: str = "Auto") -> str:
     return {"Claro": "light", "Oscuro": "dark", "Auto": "auto"}[tema]
 
 
-# ---------------------------------------------------------------- preferencias (tema persistente)
 def tema_guardado() -> str:
     try:
         t = json.loads(config.PREFS_PATH.read_text(encoding="utf-8")).get("tema", "Auto")
@@ -60,7 +59,6 @@ def guardar_tema(tema: str) -> None:
             pass
 
 
-# ---------------------------------------------------------------- helpers de HTML (todo texto externo se escapa)
 NIVELES = [(70, "Alta", "ok"), (50, "Media", "warn"), (0, "Baja", "mute")]
 FUENTES = {"publico": "Dato público", "senal": "Señal detectada", "hipotesis": "Hipótesis", "manual": "Ingresado por ti"}
 
@@ -74,11 +72,6 @@ def nivel(score: float) -> tuple[str, str]:
         if score >= minimo:
             return nombre, tono
     return "Baja", "mute"
-
-
-def pill_score(score: float) -> str:
-    nombre, tono = nivel(score)
-    return pill(f"Prioridad {nombre} · {int(score)}", tono)
 
 
 def fuente(tipo: str) -> str:

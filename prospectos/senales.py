@@ -3,7 +3,7 @@ import re
 
 from . import texto as texto_mod
 
-# tipo -> (regex, etiqueta para "menciona X", ¿relacionada directamente con lo que Yael vende?)
+# tipo -> (regex, etiqueta para "menciona X", ¿relacionada directamente con lo que se vende?)
 SENALES = {
     "sobre_pedido": (r"(?:sobre|bajo) pedido|(?:fabric\w+|manufactur\w+|producci[oó]n|maquinad\w+)\s+(?:a|bajo)\s+(?:la\s+)?(?:medida|dise[ñn]o|especificaci\w+)", "fabricación sobre pedido", True),
     "cotizacion": (r"cotizaci[oó]n|cotizar|cotiza\b|solicita(?:r)? (?:tu |su )?cotizaci", "cotizaciones", True),

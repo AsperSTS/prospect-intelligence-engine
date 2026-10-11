@@ -34,7 +34,6 @@ def html(cuerpo, ctype="text/html; charset=utf-8", status=200, headers=None):
     return httpx.Response(status, content=cuerpo.encode(), headers={"content-type": ctype, **(headers or {})})
 
 
-# ------------------------------------------------------------ SSRF
 @pytest.mark.parametrize("url", ["http://localhost/", "http://127.0.0.1/", "http://127.9.9.9/", "http://10.1.2.3/", "http://172.16.0.1/",
                                  "http://192.168.0.10/", "http://169.254.169.254/latest/meta-data", "http://[::1]/", "http://0.0.0.0/",
                                  "http://evil.test/", "http://interno.test/", "http://meta.test/", "ftp://publico.test/", "file:///etc/passwd"])
@@ -87,7 +86,6 @@ def test_timeout_y_errores_de_red_no_rompen():
     assert enrich.enriquecer_dominio(cliente(h), "evil.test", pausa=lambda s: None)["status"] == "bloqueado"
 
 
-# ------------------------------------------------------------ extracción
 HOME = """<html><body><a href="/nosotros">Nosotros</a><a href="/servicios.html">Servicios</a><a href="/productos">Productos</a>
 <a href="/contacto">Contacto</a><a href="/blog">Blog</a><a href="/catalogo.pdf">PDF</a><a href="http://externo.test/servicios">ext</a>
 <script>var x='cotización falsa en script';</script><p>Fabricamos sobre pedido. Escríbanos a ventas@publico.test o info@gmail.com</p></body></html>"""
@@ -125,7 +123,6 @@ def test_detectar_no_inventa():
     assert senales.observacion(["sobre_pedido"])[1] == "Vi en su sitio que fabrican sobre pedido."
 
 
-# ------------------------------------------------------------ caché 30 días
 def test_cache_evita_volver_a_descargar(tmpdb, monkeypatch):
     llamadas = []
     monkeypatch.setattr(enrich, "enriquecer_dominio", lambda c, d, **k: llamadas.append(d) or

@@ -1,5 +1,5 @@
 """Orquesta pull → análisis (grupos, fit, prioridad, hipótesis) → enriquecimiento web sobre la base SQLite."""
-import re
+import json
 import sqlite3
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -60,7 +60,6 @@ def pull(entidades: list[str], estratos: list[str] | None = None, limite: int | 
     return total_nuevos
 
 
-# ------------------------------------------------------------------ análisis
 def _contexto(con: sqlite3.Connection):
     filas = [dict(r) for r in con.execute("SELECT * FROM prospectos")]
     sen = defaultdict(list)
@@ -72,7 +71,7 @@ def _contexto(con: sqlite3.Connection):
 def analizar_todos() -> int:
     """Recalcula grupos, fit, prioridad, hipótesis, siguiente acción y mensaje sugerido de todos los registros."""
     with db.conectar() as con:
-        for sid, t in con.execute("SELECT id, signal_text FROM web_signals").fetchall():   # sanea evidencia guardada antes de la limpieza
+        for sid, t in con.execute("SELECT id, signal_text FROM web_signals").fetchall():   # normaliza evidencia guardada antes de la limpieza
             limpio = texto.sin_ruido_de_menu(texto.limpiar(t))
             if limpio != t:
                 con.execute("UPDATE web_signals SET signal_text=? WHERE id=?", (limpio, sid))
@@ -99,7 +98,6 @@ def analizar_todos() -> int:
 def refrescar_prioridades() -> int:
     """Recalcula solo prioridad y siguiente acción (dependen del estado y de la fecha: un seguimiento vence sin que nadie escriba).
     Escribe únicamente las filas que cambiaron. Devuelve cuántas."""
-    import json
     with db.conectar() as con:
         filas, sen = _contexto(con)
         contactados = {r["group_key"] for r in filas if (r.get("etapa_max") or 0) >= 1 and r.get("possible_chain")}
@@ -116,7 +114,6 @@ def refrescar_prioridades() -> int:
         return len(cambios)
 
 
-# ------------------------------------------------------------------ web
 def _aplicar(con: sqlite3.Connection, dominio: str, res: dict) -> int:
     ahora = datetime.now().isoformat(timespec="seconds")
     if res["status"] != "ok":   # fallo de red/bloqueo: se cachea el intento pero no se pierden datos previos
@@ -155,6 +152,3 @@ def enriquecer_pendientes(limite: int = 100, forzar: bool = False, log=print) ->
         log(f"dominios visitados: {len(resultados)} · con respuesta: {ok} · señales: {sum(len(r['signals']) for _, r in resultados)}")
         return len(resultados)
 
-
-def slug_ok(s: str) -> bool:
-    return bool(re.fullmatch(r"\d{2}", s))

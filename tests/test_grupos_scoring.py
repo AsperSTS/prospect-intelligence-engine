@@ -1,4 +1,3 @@
-import json
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -16,7 +15,6 @@ def f(i, **kw):
     return base
 
 
-# ---------------------------------------------------------------- dedupe
 def test_normalizar_quita_sufijos_y_acentos_solo_para_comparar():
     assert grupos.normalizar("Aceros del Tóro, S.A. de C.V.") == "aceros del toro"
     assert grupos.normalizar("MAQUINAS DIESEL SUC. PUEBLA") == "maquinas diesel"
@@ -53,7 +51,6 @@ def test_telefono_repetido_agrupa():
     assert g["1"]["possible_chain"] == 1 and "mismo teléfono" in g["1"]["group_reason"]
 
 
-# ---------------------------------------------------------------- fit
 def row(**kw):
     base = {"estrato": "31 a 50 personas", "tipo_establecimiento": "Fijo", "corredor_nombre": "", "corredor_tipo": "", "correo": "", "correo_web": "",
             "telefono": "", "whatsapp": "", "sitio": "", "estado": "nuevo", "possible_chain": 0, "proximo_seguimiento": None,
@@ -97,7 +94,6 @@ def test_fit_senales_tope_10():
     assert items["senales"] == 10
 
 
-# ---------------------------------------------------------------- prioridad
 def prio(r, fit=80, tipos=(), grupo=False, hoy=None):
     return scoring.priority(r, fit, list(tipos), grupo, hoy)
 
@@ -149,7 +145,6 @@ def test_limites_de_prioridad_mantienen_desglose_explicable(r, fit, tipos):
     assert any(i["clave"] == "limite" for i in items)
 
 
-# ---------------------------------------------------------------- next best action
 def nba(r, fit=70, senal=False):
     return acciones.recommend_next_action({"nombre": "Metales del Centro", "giro": "Metalmecánica", "toques": 1, **r}, fit, senal)
 

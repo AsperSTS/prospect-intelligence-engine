@@ -1,69 +1,78 @@
 # Prospect Intelligence
 
-Herramienta local para encontrar, priorizar y dar seguimiento a prospectos B2B usando datos públicos.
+Herramienta local para priorizar prospectos B2B a partir de datos públicos.
 
-Actualmente utiliza información de DENUE (INEGI) para identificar empresas en Puebla y Tlaxcala, enriquecer algunos registros con información pública de sus sitios web y generar una cola de prospectos según su relevancia.
+## Problema que resuelve
 
-El sistema no envía mensajes automáticamente. La revisión, contacto y seguimiento quedan siempre bajo control del usuario.
+Antes de contactar a una empresa hay que revisar su giro, su tamaño, sus datos de contacto y su sitio web. Hacer esa investigación a mano para cientos de establecimientos consume tiempo y es fácil de hacer sin criterio uniforme.
 
-## Funciones
+Esta herramienta reduce ese trabajo previo: toma establecimientos del DENUE (INEGI), los clasifica, revisa sitios web públicos y ordena una cola de trabajo con el motivo de cada puntuación. La decisión de a quién contactar, por qué y con qué mensaje sigue siendo de la persona que la usa.
 
-- Consulta y almacenamiento de empresas desde fuentes públicas
-- Clasificación y priorización de prospectos
-- Enriquecimiento básico desde sitios web públicos
-- Detección de señales comerciales y operativas
-- Seguimiento de contactos y respuestas
-- Plantillas editables para correo y WhatsApp
-- Panel interactivo con Streamlit
-- Exportación de datos a Excel
-- Base local en SQLite
+## Qué hace hoy
+
+- Importa establecimientos del DENUE por entidad, sector y estrato, con validación estricta del esquema de la API.
+- Clasifica cada establecimiento por giro (SCIAN) y tamaño, y normaliza teléfonos, correos y dominios.
+- Calcula un Fit Score y una Prioridad con desglose explicable.
+- Agrupa registros que probablemente pertenecen a la misma empresa o grupo, con la razón de la agrupación.
+- Visita un número acotado de páginas públicas por sitio web para extraer correo, WhatsApp y señales textuales, guardando la cita y la URL de origen.
+- Genera hipótesis comerciales marcadas como no verificadas, con su base y su nivel de confianza.
+- Prepara mensajes de primer contacto a partir de plantillas editables.
+- Registra contactos, respuestas y seguimientos a 3, 7 y 14 días, y cancela los seguimientos cuando hay respuesta.
+- Ofrece un panel en Streamlit (cola de trabajo, seguimientos, conversaciones, métricas y base completa) y comandos de terminal.
+- Exporta la base a Excel.
+
+La aplicación no envía mensajes. Los botones del panel copian el texto o abren Gmail o WhatsApp con el contenido preparado; el envío lo realiza la persona usuaria.
+
+## Evolución prevista
+
+DENUE es la fuente principal, pero la arquitectura separa la captura de datos del análisis para incorporar otras fuentes públicas. El objetivo es cruzar distintas señales para mejorar la selección de prospectos. Por ahora no hay otras fuentes integradas.
+
+## Stack
+
+Python 3.14 · SQLite · Streamlit · httpx · pandas · pydantic · openpyxl
 
 ## Instalación
 
-### Conda
+Requiere Python 3.14.
+
+Con Conda:
 
 ```bash
 conda env create -f environment.yml
-conda activate prospectos-intelligence
+conda activate prospect-intelligence
 ```
 
-### Python
+Con `venv`:
 
 ```bash
-python -m venv .venv
+python3.14 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Probado con Python 3.14.
+Para ejecutar las pruebas, instala `requirements-dev.txt` en lugar de `requirements.txt`.
 
 ## Configuración
 
-Actualmente el proyecto utiliza la API de DENUE.
-
-Copia:
+Solicita un token de la API DENUE de INEGI y guárdalo en un archivo `.env` a partir de la plantilla:
 
 ```bash
-.env.example
+cp .env.example .env
 ```
 
-como:
+Después define el valor en `.env`:
 
-```bash
-.env
-```
-
-y agrega tu token:
-
-```env
+```text
 DENUE_TOKEN=tu_token
 ```
 
-El archivo `.env` está excluido del repositorio.
+El archivo `.env` no se versiona. Si falta el token, el programa se detiene con un mensaje que indica cómo corregirlo.
+
+La base SQLite se crea en `data/prospectos.db`. Para usar otra ruta, define la variable `PROSPECTOS_DB`.
 
 ## Uso
 
-Ejecutar el pipeline:
+Importar, analizar y enriquecer con sitios web (por defecto, Puebla y Tlaxcala):
 
 ```bash
 python -m prospectos run --enriquecer 100
@@ -75,47 +84,47 @@ Abrir el panel:
 streamlit run app.py
 ```
 
-Ver los prospectos prioritarios desde terminal:
+Ver los prospectos prioritarios y los seguimientos vencidos en terminal:
 
 ```bash
 python -m prospectos daily
 ```
 
-También están disponibles:
+Otros comandos: `cuantificar`, `pull`, `analizar`, `enriquecer` y `export`. El comando `export` escribe un archivo `.xlsx` en `exports/`. Ejecuta `python -m prospectos --help` para ver las opciones.
 
-```text
-cuantificar
-pull
-analizar
-enriquecer
-export
+Pruebas:
+
+```bash
+python -m pytest
 ```
 
 ## Estructura
 
 ```text
-prospectos/             lógica, datos y scoring
-ui/                     interfaz Streamlit
-config/templates.toml   plantillas de contacto
-tests/                  pruebas
-data/                   base SQLite local
-exports/                archivos generados
+app.py                  panel Streamlit
+prospectos/             importación DENUE, análisis, scoring, mensajes, CRM y base SQLite
+ui/                     componentes y estilos del panel
+config/templates.toml   plantillas de mensajes
+.streamlit/config.toml  tema del panel
+tests/                  pruebas automatizadas
+data/                   base local generada (no versionada)
+exports/                archivos generados (no versionados)
 ```
 
-## Datos
+## Limitaciones
 
-La base local se crea automáticamente en:
+- Solo usa DENUE y sitios web públicos. No incorpora otras fuentes.
+- Los datos de DENUE pueden estar incompletos o desactualizados. La fecha de alta es la incorporación reportada en DENUE, no la fecha de fundación.
+- El enriquecimiento lee HTML estático. Los sitios que se generan con JavaScript pueden devolver poca información.
+- Las puntuaciones son reglas internas de priorización, no probabilidades de compra. No están calibradas con resultados reales.
+- Las hipótesis y señales deben verificarse antes de usarse en una conversación. El sitio encontrado puede no corresponder a la empresa.
+- Está diseñada para una sola persona que trabaja en local. SQLite no soporta uso concurrente de varias personas.
 
-```text
-data/prospectos.db
-```
+## Autor
 
-Los datos provienen actualmente de fuentes públicas y pueden estar incompletos.
+Yael de los Santos · 2026
+WhatsApp: +52 220 570 4385
 
-Los scores son reglas de priorización internas, no predicciones de compra ni evaluaciones de las empresas.
+## Licencia
 
-## Estado
-
-Proyecto personal en desarrollo.
-
-La arquitectura está preparada para incorporar nuevas fuentes de información y cruzar datos adicionales en futuras versiones.
+Distribuido bajo licencia MIT. Consulta [LICENSE](LICENSE).

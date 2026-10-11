@@ -1,4 +1,4 @@
-"""CLI: python -m prospectos <comando>"""
+"""Interfaz de línea de comandos: python -m prospectos <comando>."""
 import argparse
 from datetime import date
 
@@ -54,7 +54,7 @@ def cmd_daily(_):
         print(f"\n[FIT {r['fit_score']} · PRIORIDAD {r['priority_score']}] {r['nombre'].title()} · {r['municipio']} · {r['giro']} · {r['estrato']}")
         print(f"  acción: {acciones.ROTULOS.get(r['canal'], r['canal'])} · {r['hypothesis_text']}")
         if r["possible_chain"]:
-            print(f"  ⚠ posible grupo ({r['possible_chain_count']}): {r['group_reason']}")
+            print(f"  aviso: posible grupo ({r['possible_chain_count']}): {r['group_reason']}")
     for r in seg:
         print(f"\nSEGUIMIENTO {r['nombre'].title()} (toque {r['toques']}, desde {r['contactado_en']})")
 

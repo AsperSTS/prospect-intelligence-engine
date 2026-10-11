@@ -121,7 +121,7 @@ def _migrar(con: sqlite3.Connection) -> None:
     for col, ddl in [("toques", "INTEGER DEFAULT 0"), ("variante", "TEXT"), ("contactado_en", "TEXT"), ("proximo_seguimiento", "TEXT"), ("score", "INTEGER DEFAULT 0")] + V2_COLUMNS:
         if col not in existentes:
             con.execute(f"ALTER TABLE prospectos ADD COLUMN {col} {ddl}")
-    # normalizar estados al vocabulario del brief
+    # normaliza estados al vocabulario vigente
     con.execute("UPDATE prospectos SET estado='revisado' WHERE estado='contactar'")
     con.execute("UPDATE prospectos SET estado='cliente' WHERE estado='ganado'")
     # contactos previos sin historial: crear la interacción de origen para no perderlos en las métricas
@@ -156,7 +156,6 @@ def conectar():
         con.close()
 
 
-# ---------------------------------------------------------------- DENUE
 def upsert_denue(con: sqlite3.Connection, filas: list[dict]) -> tuple[int, int]:
     """Devuelve (nuevos, actualizados). Refresca solo campos DENUE; el CRM no se toca."""
     nuevos = 0
@@ -171,7 +170,6 @@ def upsert_denue(con: sqlite3.Connection, filas: list[dict]) -> tuple[int, int]:
     return nuevos, len(filas) - nuevos
 
 
-# ---------------------------------------------------------------- web
 def guardar_senales(con: sqlite3.Connection, pid: str, senales: list[dict]) -> None:
     con.execute("DELETE FROM web_signals WHERE prospect_id=?", (pid,))
     con.executemany(
@@ -190,7 +188,6 @@ def guardar_analisis(con: sqlite3.Connection, pid: str, **campos) -> None:
     con.execute(f"UPDATE prospectos SET {sets}, analizado_en=datetime('now','localtime') WHERE id=?", [*campos.values(), pid])
 
 
-# ---------------------------------------------------------------- CRM
 def registrar_actividad(con: sqlite3.Connection, tipo: str, pid: str | None = None) -> None:
     con.execute("INSERT INTO actividad (tipo, prospecto_id) VALUES (?, ?)", (tipo, pid))
 
@@ -275,7 +272,6 @@ def seguimientos_pendientes(con: sqlite3.Connection) -> list[sqlite3.Row]:
                        " ORDER BY proximo_seguimiento").fetchall()
 
 
-# ---------------------------------------------------------------- metas diarias
 META_DIARIA = {"investigado": 5, "contacto": 3, "publicacion": 1, "seguimiento": 1}
 
 
