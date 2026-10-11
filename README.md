@@ -1,48 +1,51 @@
 # Prospect Intelligence
 
-Herramienta local para priorizar prospectos B2B a partir de datos públicos.
+Local B2B prospecting tool that turns public business data into a prioritized, explainable work queue.
 
-## Problema que resuelve
+The current version uses DENUE (INEGI) as its main data source, enriches records with public website information, scores prospects using deterministic rules, and helps prepare and track outreach without sending messages automatically.
 
-Antes de contactar a una empresa hay que revisar su giro, su tamaño, sus datos de contacto y su sitio web. Hacer esa investigación a mano para cientos de establecimientos consume tiempo y es fácil de hacer sin criterio uniforme.
+## What it does
 
-Esta herramienta reduce ese trabajo previo: toma establecimientos del DENUE (INEGI), los clasifica, revisa sitios web públicos y ordena una cola de trabajo con el motivo de cada puntuación. La decisión de a quién contactar, por qué y con qué mensaje sigue siendo de la persona que la usa.
+- Imports establishments from DENUE by location, sector and employee range.
+- Normalizes business, contact and website data.
+- Calculates separate Fit and Priority scores with visible breakdowns.
+- Groups records that may belong to the same company or business group.
+- Reviews a limited set of public website pages and stores detected signals with their source URL.
+- Generates commercial hypotheses clearly marked as unverified.
+- Prepares first-contact messages from editable templates.
+- Tracks contacts, responses and follow-ups at 3, 7 and 14 days.
+- Provides a Streamlit interface and CLI commands.
+- Exports data to Excel.
 
-## Qué hace hoy
+The application does not send email or WhatsApp messages. Final review and outreach remain manual.
 
-- Importa establecimientos del DENUE por entidad, sector y estrato, con validación estricta del esquema de la API.
-- Clasifica cada establecimiento por giro (SCIAN) y tamaño, y normaliza teléfonos, correos y dominios.
-- Calcula un Fit Score y una Prioridad con desglose explicable.
-- Agrupa registros que probablemente pertenecen a la misma empresa o grupo, con la razón de la agrupación.
-- Visita un número acotado de páginas públicas por sitio web para extraer correo, WhatsApp y señales textuales, guardando la cita y la URL de origen.
-- Genera hipótesis comerciales marcadas como no verificadas, con su base y su nivel de confianza.
-- Prepara mensajes de primer contacto a partir de plantillas editables.
-- Registra contactos, respuestas y seguimientos a 3, 7 y 14 días, y cancela los seguimientos cuando hay respuesta.
-- Ofrece un panel en Streamlit (cola de trabajo, seguimientos, conversaciones, métricas y base completa) y comandos de terminal.
-- Exporta la base a Excel.
+## Architecture
 
-La aplicación no envía mensajes. Los botones del panel copian el texto o abren Gmail o WhatsApp con el contenido preparado; el envío lo realiza la persona usuaria.
+```text
+DENUE API
+   ↓
+validation and normalization
+   ↓
+SQLite
+   ↓
+classification and enrichment
+   ↓
+Fit / Priority scoring
+   ↓
+Streamlit queue and CLI
+   ↓
+manual outreach and follow-up tracking
+```
 
-## Evolución prevista
-
-DENUE es la fuente principal, pero la arquitectura separa la captura de datos del análisis para incorporar otras fuentes públicas. El objetivo es cruzar distintas señales para mejorar la selección de prospectos. Por ahora no hay otras fuentes integradas.
+The data-ingestion layer is separated from analysis so additional public sources can be incorporated later.
 
 ## Stack
 
 Python 3.14 · SQLite · Streamlit · httpx · pandas · pydantic · openpyxl
 
-## Instalación
+## Quick start
 
-Requiere Python 3.14.
-
-Con Conda:
-
-```bash
-conda env create -f environment.yml
-conda activate prospect-intelligence
-```
-
-Con `venv`:
+Create a local environment and install dependencies:
 
 ```bash
 python3.14 -m venv .venv
@@ -50,81 +53,48 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Para ejecutar las pruebas, instala `requirements-dev.txt` en lugar de `requirements.txt`.
-
-## Configuración
-
-Solicita un token de la API DENUE de INEGI y guárdalo en un archivo `.env` a partir de la plantilla:
-
-```bash
-cp .env.example .env
-```
-
-Después define el valor en `.env`:
+Create `.env` from `.env.example` and add a DENUE API token:
 
 ```text
-DENUE_TOKEN=tu_token
+DENUE_TOKEN=your_token
 ```
 
-El archivo `.env` no se versiona. Si falta el token, el programa se detiene con un mensaje que indica cómo corregirlo.
-
-La base SQLite se crea en `data/prospectos.db`. Para usar otra ruta, define la variable `PROSPECTOS_DB`.
-
-## Uso
-
-Importar, analizar y enriquecer con sitios web (por defecto, Puebla y Tlaxcala):
+Run the pipeline:
 
 ```bash
 python -m prospectos run --enriquecer 100
 ```
 
-Abrir el panel:
+Open the dashboard:
 
 ```bash
 streamlit run app.py
 ```
 
-Ver los prospectos prioritarios y los seguimientos vencidos en terminal:
-
-```bash
-python -m prospectos daily
-```
-
-Otros comandos: `cuantificar`, `pull`, `analizar`, `enriquecer` y `export`. El comando `export` escribe un archivo `.xlsx` en `exports/`. Ejecuta `python -m prospectos --help` para ver las opciones.
-
-Pruebas:
+Run tests:
 
 ```bash
 python -m pytest
 ```
 
-## Estructura
+## Design decisions
 
-```text
-app.py                  panel Streamlit
-prospectos/             importación DENUE, análisis, scoring, mensajes, CRM y base SQLite
-ui/                     componentes y estilos del panel
-config/templates.toml   plantillas de mensajes
-.streamlit/config.toml  tema del panel
-tests/                  pruebas automatizadas
-data/                   base local generada (no versionada)
-exports/                archivos generados (no versionados)
-```
+- **Explainable scoring:** scores are prioritization rules, not purchase probabilities.
+- **Human-in-the-loop outreach:** the system prepares context and messages but does not send them.
+- **Deterministic templates:** no LLM is required for prospect classification or messaging.
+- **Local-first storage:** SQLite keeps the workflow simple for a single-user tool.
+- **Defensive enrichment:** website requests are limited and validated before processing.
 
-## Limitaciones
+## Limitations
 
-- Solo usa DENUE y sitios web públicos. No incorpora otras fuentes.
-- Los datos de DENUE pueden estar incompletos o desactualizados. La fecha de alta es la incorporación reportada en DENUE, no la fecha de fundación.
-- El enriquecimiento lee HTML estático. Los sitios que se generan con JavaScript pueden devolver poca información.
-- Las puntuaciones son reglas internas de priorización, no probabilidades de compra. No están calibradas con resultados reales.
-- Las hipótesis y señales deben verificarse antes de usarse en una conversación. El sitio encontrado puede no corresponder a la empresa.
-- Está diseñada para una sola persona que trabaja en local. SQLite no soporta uso concurrente de varias personas.
+DENUE and website data may be incomplete or outdated. `fecha_alta` represents incorporation into DENUE, not company founding date. Website signals and commercial hypotheses must be verified before use.
 
-## Autor
+The current scoring model is rule-based and has not yet been calibrated with enough real outreach outcomes to treat it as predictive.
+
+## Author
 
 Yael de los Santos · 2026
-WhatsApp: +52 220 570 4385
 
-## Licencia
+## License
 
-Distribuido bajo licencia MIT. Consulta [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
